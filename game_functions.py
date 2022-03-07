@@ -2,6 +2,7 @@ import sys
 import pygame
 from bullet import Bullet
 from alien import Alien
+from time import sleep
 
 def check_events(game_settings, screen, ship, bullets):
 
@@ -61,21 +62,30 @@ def ship_keyup_event(ship, event):
     elif event.key == pygame.K_DOWN:
         ship.move_down = False
 
-def update_bullets(aliens, bullets):
+def update_bullets(game_settings, screen, ship, aliens, bullets):
     
     # Update bullet sprites
     bullets.update()
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
+    
+    check_bullet_collisions_and_fleet(game_settings, screen, ship, aliens, bullets)
+
+def check_bullet_collisions_and_fleet(game_settings, screen, ship, aliens, bullets):
+    
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+
+    if len(aliens) == 0:
+
+        bullets.empty()
+        create_fleet(game_settings, screen, aliens, ship)
 
 def bullet_keydown_event(bullets, event, game_settings, screen, ship):
     if event.key == pygame.K_SPACE:
         if len(bullets) < game_settings.max_bullets:
             new_bullet = Bullet(game_settings, screen, ship)
             bullets.add(new_bullet)
-
 
 def create_fleet(game_settings, screen, aliens, ship):
 
@@ -107,9 +117,13 @@ def create_alien(game_settings, screen, aliens, alien_num, row_number):
     alien.rect.x = alien.x
     aliens.add(alien)
 
-def update_aliens(game_settings, aliens):
+def update_aliens(game_settings, aliens, ship, stats, screen, bullets):
     check_fleet_edges(game_settings, aliens)
+    check_aliens_bottom(game_settings, stats, screen, ship, aliens, bullets)
     aliens.update()
+
+    if pygame.sprite.spritecollideany(ship, aliens):
+        ship_hit(game_settings, aliens, ship, stats, screen, bullets)
 
 def check_fleet_edges(game_settings, aliens):
 
@@ -125,3 +139,32 @@ def change_fleet_direction(game_settings, aliens):
         # Change the direction
         alien.rect.y += game_settings.alien_drop_speed
     game_settings.fleet_direction *= -1
+
+def ship_hit(game_settings, aliens, ship, stats, screen, bullets):
+
+    if stats.remaining_ships > 0:
+        stats.remaining_ships -= 1
+
+        # Clear all aliens & bullets
+        aliens.empty()
+        bullets.empty()
+
+        # Reset the round with one less ship
+        create_fleet(game_settings, screen, aliens, ship)
+        ship.center_ship()
+
+        sleep(1.0)
+    
+    else:
+        stats.game_active = False
+
+# Check if aliens have reached the bottom of the screen
+def check_aliens_bottom(game_settings, stats, screen, ship, aliens, bullets):
+    screen_rect = screen.get_rect()
+
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+
+            ship_hit(game_settings, aliens, ship, stats, screen, bullets)
+            break
+    

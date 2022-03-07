@@ -36,3 +36,7 @@ class Ship():
             self.rect.centery -= self.game_settings.ship_movement_speed
         elif self.move_down == True and self.rect.bottom < self.game_settings.screen_height:
             self.rect.centery += self.game_settings.ship_movement_speed
+    
+    def center_ship(self):
+        self.center = self.screen_rect.centery
+        self.rect.bottom = self.screen_rect.bottom
