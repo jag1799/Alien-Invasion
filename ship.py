@@ -1,11 +1,13 @@
 import pygame
-
-class Ship():
+from pygame.sprite import Sprite
+class Ship(Sprite):
 
     def __init__(self, game_settings, screen):
 
         self.screen = screen
 
+        super(Ship, self).__init__()
+        
         # Load ship image
         self.image = pygame.image.load("C:/Users/19255/Documents/GitHub/Alien-Invasion/images/spaceship.png")
         self.rect = self.image.get_rect()
@@ -38,5 +40,5 @@ class Ship():
             self.rect.centery += self.game_settings.ship_movement_speed
     
     def center_ship(self):
-        self.center = self.screen_rect.centery
         self.rect.bottom = self.screen_rect.bottom
+        self.center = self.screen_rect.centerx

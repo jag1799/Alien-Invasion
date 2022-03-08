@@ -1,7 +1,6 @@
 import pygame
 from pygame.sprite import Sprite
 
-
 class Alien(Sprite):
 
     def __init__(self, screen, game_settings):
@@ -19,7 +18,6 @@ class Alien(Sprite):
 
         # Store alien's position
         self.x = float(self.rect.x)
-    
     
     def blitme(self):
         self.screen.blit(self.image, self.rect)
